@@ -5,7 +5,16 @@ const Product = require('../models/Product');
 // GET all products
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find();
+    // Build filter object from query parameters
+    const filter = {};
+    for (const [key, value] of Object.entries(req.query)) {
+      // Ignore parameters with null value or 'null' string
+      if (value !== null && value !== 'null' && value !== '') {
+        filter[key] = value;
+      }
+    }
+    
+    const products = await Product.find(filter);
     console.log('products:', products);
     res.status(200).json(products);
   } catch (err) {

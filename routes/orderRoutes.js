@@ -6,7 +6,16 @@ const Product = require('../models/Product');
 // GET all orders
 router.get('/', async (req, res) => {
   try {
-    const orders = await Order.find().populate('items.product_id');
+    // Build filter object from query parameters
+    const filter = {};
+    for (const [key, value] of Object.entries(req.query)) {
+      // Ignore parameters with null value or 'null' string
+      if (value !== null && value !== 'null' && value !== '') {
+        filter[key] = value;
+      }
+    }
+    
+    const orders = await Order.find(filter).populate('items.product_id');
     res.status(200).json(orders);
   } catch (err) {
     res.status(500).json({ error: err.message });

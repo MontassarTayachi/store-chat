@@ -6,7 +6,16 @@ const Order = require('../models/Order.js');
 // GET all deliveries
 router.get('/', async (req, res) => {
   try {
-    const deliveries = await Delivery.find().populate('order_id');
+    // Build filter object from query parameters
+    const filter = {};
+    for (const [key, value] of Object.entries(req.query)) {
+      // Ignore parameters with null value or 'null' string
+      if (value !== null && value !== 'null' && value !== '') {
+        filter[key] = value;
+      }
+    }
+    
+    const deliveries = await Delivery.find(filter).populate('order_id');
     res.status(200).json(deliveries);
   } catch (err) {
     res.status(500).json({ error: err.message });

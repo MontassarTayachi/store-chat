@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const Orders = require('../models/Orders');
+const Order = require('../models/Order');
 const Product = require('../models/Product');
 
 // GET all orders
 router.get('/', async (req, res) => {
   try {
-    const orders = await Orders.find().populate('items.product_id');
+    const orders = await Order.find().populate('items.product_id');
     res.status(200).json(orders);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 // GET order by ID
 router.get('/:id', async (req, res) => {
   try {
-    const order = await Orders.findById(req.params.id).populate('items.product_id');
+    const order = await Order.findById(req.params.id).populate('items.product_id');
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
       total_amount += price * item.quantity;
     }
 
-    const newOrder = new Orders({
+    const newOrder = new Order({
       customer_name,
       items,
       total_amount,
@@ -84,7 +84,7 @@ router.put('/:id', async (req, res) => {
       updateData.total_amount = total_amount;
     }
 
-    const order = await Orders.findByIdAndUpdate(
+    const order = await Order.findByIdAndUpdate(
       req.params.id,
       updateData,
       { new: true, runValidators: true }
@@ -103,7 +103,7 @@ router.put('/:id', async (req, res) => {
 // DELETE an order
 router.delete('/:id', async (req, res) => {
   try {
-    const order = await Orders.findByIdAndDelete(req.params.id);
+    const order = await Order.findByIdAndDelete(req.params.id);
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });

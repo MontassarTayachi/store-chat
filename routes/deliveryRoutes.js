@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Delivery = require('../models/Delivery');
-const Orders = require('../models/Orders');
+const Delivery = require('../models/Delivery.js');
+const Order = require('../models/Order.js');
 
 // GET all deliveries
 router.get('/', async (req, res) => {
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
     }
 
     // Verify order exists
-    const order = await Orders.findById(order_id);
+    const order = await Order.findById(order_id);
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -94,7 +94,7 @@ router.put('/:id', async (req, res) => {
 
     // If delivery is marked as delivered, update order status
     if (delivery_status === 'Delivered' && delivery.order_id) {
-      await Orders.findByIdAndUpdate(delivery.order_id, { status: 'Delivered' });
+      await Order.findByIdAndUpdate(delivery.order_id, { status: 'Delivered' });
     }
 
     res.status(200).json(delivery);

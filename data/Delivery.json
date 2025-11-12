@@ -1,0 +1,82 @@
+[
+  {
+    "delivery_id": 1,
+    "order_id": 1,
+    "tracking_number": "TRK10001",
+    "delivery_status": "Preparing",
+    "estimated_arrival": "2025-11-14",
+    "delivered_date": null
+  },
+  {
+    "delivery_id": 2,
+    "order_id": 2,
+    "tracking_number": "TRK10002",
+    "delivery_status": "In Transit",
+    "estimated_arrival": "2025-11-13",
+    "delivered_date": null
+  },
+  {
+    "delivery_id": 3,
+    "order_id": 3,
+    "tracking_number": "TRK10003",
+    "delivery_status": "Delivered",
+    "estimated_arrival": "2025-11-06",
+    "delivered_date": "2025-11-05"
+  },
+  {
+    "delivery_id": 4,
+    "order_id": 4,
+    "tracking_number": "TRK10004",
+    "delivery_status": "Cancelled",
+    "estimated_arrival": null,
+    "delivered_date": null
+  },
+  {
+    "delivery_id": 5,
+    "order_id": 5,
+    "tracking_number": "TRK10005",
+    "delivery_status": "Preparing",
+    "estimated_arrival": "2025-11-15",
+    "delivered_date": null
+  },
+  {
+    "delivery_id": 6,
+    "order_id": 6,
+    "tracking_number": "TRK10006",
+    "delivery_status": "In Transit",
+    "estimated_arrival": "2025-11-13",
+    "delivered_date": null
+  },
+  {
+    "delivery_id": 7,
+    "order_id": 7,
+    "tracking_number": "TRK10007",
+    "delivery_status": "Delivered",
+    "estimated_arrival": "2025-11-08",
+    "delivered_date": "2025-11-08"
+  },
+  {
+    "delivery_id": 8,
+    "order_id": 8,
+    "tracking_number": "TRK10008",
+    "delivery_status": "Preparing",
+    "estimated_arrival": "2025-11-16",
+    "delivered_date": null
+  },
+  {
+    "delivery_id": 9,
+    "order_id": 9,
+    "tracking_number": "TRK10009",
+    "delivery_status": "In Transit",
+    "estimated_arrival": "2025-11-14",
+    "delivered_date": null
+  },
+  {
+    "delivery_id": 10,
+    "order_id": 10,
+    "tracking_number": "TRK10010",
+    "delivery_status": "Delivered",
+    "estimated_arrival": "2025-11-11",
+    "delivered_date": "2025-11-10"
+  }
+]

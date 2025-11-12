@@ -10,7 +10,7 @@ const deliveryRoutes = require('./routes/deliveryRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI;
+
 
 // Middleware
 app.use(cors());
@@ -18,15 +18,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    console.log('✓ Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.error('✗ MongoDB connection error:', err);
-    process.exit(1);
-  });
+const MONGODB_URI = process.env.MONGODB_URI || 
+  'mongodb+srv://yassine:yassine@cluster0.jl8x5li.mongodb.net/magasin_tayachi?retryWrites=true&w=majority';
 
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => {
+    console.log('✅ MongoDB connected successfully!');
+  })
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+  });
 // Routes
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);

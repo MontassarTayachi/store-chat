@@ -33,13 +33,14 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const { name, description, price, stock, category } = req.body;
+        const { reference, name, description, price, stock, category } = req.body;
 
-        if (!name || price === undefined || stock === undefined) {
-            return res.status(400).json({ error: 'Missing required fields: name, price, stock' });
+        if (!reference || !name || price === undefined || stock === undefined) {
+            return res.status(400).json({ error: 'Missing required fields: reference, name, price, stock' });
         }
 
         const newProduct = new Product({
+            reference,
             name,
             description,
             price,
@@ -56,11 +57,12 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        const { name, description, price, stock, category } = req.body;
+        const { reference, name, description, price, stock, category } = req.body;
 
         const product = await Product.findByIdAndUpdate(
             req.params.id,
             {
+                reference,
                 name,
                 description,
                 price,

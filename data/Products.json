@@ -1,5 +1,6 @@
 [
     {
+        "reference": "PROD001",
         "name": "Wireless Mouse",
         "description": "Ergonomic wireless mouse with 2.4GHz connection and long battery life.",
         "price": 19.99,
@@ -7,6 +8,7 @@
         "category": "Electronics"
     },
     {
+        "reference": "PROD002",
         "name": "Mechanical Keyboard",
         "description": "RGB backlit mechanical keyboard with blue switches.",
         "price": 59.99,
@@ -14,6 +16,7 @@
         "category": "Electronics"
     },
     {
+        "reference": "PROD003",
         "name": "Noise Cancelling Headphones",
         "description": "Over-ear headphones with active noise cancellation and 20-hour battery.",
         "price": 89.99,
@@ -21,6 +24,7 @@
         "category": "Audio"
     },
     {
+        "reference": "PROD004",
         "name": "Smartwatch",
         "description": "Water-resistant smartwatch with fitness tracking and notifications.",
         "price": 129.99,
@@ -28,6 +32,7 @@
         "category": "Wearables"
     },
     {
+        "reference": "PROD005",
         "name": "USB-C Charger",
         "description": "Fast charging 65W USB-C wall charger for laptops and phones.",
         "price": 24.99,
@@ -35,6 +40,7 @@
         "category": "Accessories"
     },
     {
+        "reference": "PROD006",
         "name": "Gaming Chair",
         "description": "Adjustable ergonomic gaming chair with lumbar support.",
         "price": 199.99,
@@ -42,6 +48,7 @@
         "category": "Furniture"
     },
     {
+        "reference": "PROD007",
         "name": "LED Monitor 27-inch",
         "description": "Full HD 1080p LED monitor with HDMI and DisplayPort inputs.",
         "price": 179.99,
@@ -49,6 +56,7 @@
         "category": "Electronics"
     },
     {
+        "reference": "PROD008",
         "name": "External SSD 1TB",
         "description": "Portable solid-state drive with USB 3.2 interface.",
         "price": 129.49,
@@ -56,6 +64,7 @@
         "category": "Storage"
     },
     {
+        "reference": "PROD009",
         "name": "Bluetooth Speaker",
         "description": "Compact waterproof Bluetooth speaker with deep bass.",
         "price": 39.99,
@@ -63,6 +72,7 @@
         "category": "Audio"
     },
     {
+        "reference": "PROD010",
         "name": "Laptop Stand",
         "description": "Adjustable aluminum stand compatible with all laptops up to 17 inches.",
         "price": 29.99,

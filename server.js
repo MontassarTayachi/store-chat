@@ -7,6 +7,7 @@ const cors = require('cors');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
+const reclamationRoutes = require('./routes/reclamationRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +37,7 @@ mongoose.connect(MONGODB_URI, {
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/reclamations', reclamationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

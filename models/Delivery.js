@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const deliverySchema = new mongoose.Schema({
   order_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Orders',
+    ref: 'Order',
     required: true
   },
   tracking_number: {

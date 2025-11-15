@@ -38,33 +38,72 @@ router.get('/:id', async (req, res) => {
 // CREATE a new order
 router.post('/', async (req, res) => {
   try {
-    const { customer_name, items, status } = req.body;
+    const { 
+      customer_name, 
+      phone_number, 
+      shipping_address, 
+      customer_fb_id,
+      quantity,
+      product_id,
+      items, 
+      status 
+    } = req.body;
 
-    if (!customer_name || !items || items.length === 0) {
-      return res.status(400).json({ error: 'Missing required fields: customer_name, items' });
-    }
-
-    // Calculate total amount
+    // Support both single product and multiple items
     let total_amount = 0;
-    for (const item of items) {
-      const product = await Product.findById(item.product_id);
-      if (!product) {
-        return res.status(404).json({ error: `Product with ID ${item.product_id} not found` });
+    let orderData = {
+      customer_name,
+      phone_number,
+      shipping_address,
+      customer_fb_id,
+      status: status || 'Pending'
+    };
+
+    // Handle multiple items (array)
+    if (items && items.length > 0) {
+      if (!customer_name) {
+        return res.status(400).json({ error: 'Missing required field: customer_name' });
       }
-      // Use provided price or get from product
-      const price = item.price || product.price;
-      total_amount += price * item.quantity;
+
+      // Calculate total amount for items
+      for (const item of items) {
+        const product = await Product.findById(item.product_id);
+        if (!product) {
+          return res.status(404).json({ error: `Product with ID ${item.product_id} not found` });
+        }
+        // Use provided price or get from product
+        const price = item.price || product.price;
+        total_amount += price * item.quantity;
+      }
+      orderData.items = items;
+      orderData.total_amount = total_amount;
+    }
+    // Handle single product order
+    else if (product_id && quantity) {
+      if (!customer_name) {
+        return res.status(400).json({ error: 'Missing required field: customer_name' });
+      }
+
+      const product = await Product.findById(product_id);
+      if (!product) {
+        return res.status(404).json({ error: `Product with ID ${product_id} not found` });
+      }
+
+      total_amount = product.price * quantity;
+      orderData.product_id = product_id;
+      orderData.quantity = quantity;
+      orderData.total_amount = total_amount;
+    }
+    // No items or product specified
+    else {
+      return res.status(400).json({ 
+        error: 'Missing required fields: either items array or (product_id + quantity)' 
+      });
     }
 
-    const newOrder = new Order({
-      customer_name,
-      items,
-      total_amount,
-      status: status || 'Pending'
-    });
-
+    const newOrder = new Order(orderData);
     const savedOrder = await newOrder.save();
-    const populatedOrder = await savedOrder.populate('items.product_id');
+    const populatedOrder = await savedOrder.populate('items.product_id product_id');
     res.status(201).json(populatedOrder);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -74,12 +113,28 @@ router.post('/', async (req, res) => {
 // UPDATE an order
 router.put('/:id', async (req, res) => {
   try {
-    const { customer_name, items, status } = req.body;
+    const { 
+      customer_name, 
+      phone_number, 
+      shipping_address, 
+      customer_fb_id,
+      quantity,
+      product_id,
+      items, 
+      status 
+    } = req.body;
+
+    let updateData = { 
+      customer_name, 
+      phone_number, 
+      shipping_address, 
+      customer_fb_id,
+      status, 
+      updatedAt: Date.now() 
+    };
 
     // If items are being updated, recalculate total
-    let updateData = { customer_name, status, updatedAt: Date.now() };
-
-    if (items) {
+    if (items && items.length > 0) {
       let total_amount = 0;
       for (const item of items) {
         const product = await Product.findById(item.product_id);
@@ -92,12 +147,22 @@ router.put('/:id', async (req, res) => {
       updateData.items = items;
       updateData.total_amount = total_amount;
     }
+    // If single product is being updated
+    else if (product_id && quantity) {
+      const product = await Product.findById(product_id);
+      if (!product) {
+        return res.status(404).json({ error: `Product with ID ${product_id} not found` });
+      }
+      updateData.product_id = product_id;
+      updateData.quantity = quantity;
+      updateData.total_amount = product.price * quantity;
+    }
 
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('items.product_id');
+    ).populate('items.product_id product_id');
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });

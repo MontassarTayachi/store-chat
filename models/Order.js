@@ -1,9 +1,23 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
+  quantity: {
+    type: Number
+  },
   customer_name: {
     type: String,
-    required: true,
+    trim: true
+  },
+  phone_number: {
+    type: String,
+    trim: true
+  },
+  shipping_address: {
+    type: String,
+    trim: true
+  },
+  customer_fb_id: {
+    type: String,
     trim: true
   },
   order_date: {
@@ -15,25 +29,26 @@ const orderSchema = new mongoose.Schema({
     enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending'
   },
+  product_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product'
+  },
+  // Support for items array (multiple products)
   items: [{
     product_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true
+      ref: 'Product'
     },
     quantity: {
       type: Number,
-      required: true,
       min: 1
     },
     price: {
-      type: Number,
-      required: true
+      type: Number
     }
   }],
   total_amount: {
     type: Number,
-    required: true,
     min: 0
   },
   createdAt: {

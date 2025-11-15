@@ -3,15 +3,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-// Import routes
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 const reclamationRoutes = require('./routes/reclamationRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
+const PORT = process.env.PORT;
 
 // Middleware
 app.use(cors());
@@ -20,38 +18,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 
-  'mongodb+srv://yassine:yassine@cluster0.jl8x5li.mongodb.net/magasin_tayachi?retryWrites=true&w=majority';
-
+const MONGODB_URI = process.env.DATABASE_URL;
 mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => {
-    console.log('✅ MongoDB connected successfully!');
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-  });
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('MongoDB connected successfully!');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
+    throw err; // Stop the application if DB connection fails
+});
+
 // Routes
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/reclamations', reclamationRoutes);
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Server is running' });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!', message: err.message });
-});
-
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
-

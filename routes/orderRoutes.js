@@ -3,7 +3,6 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 
-// GET all orders
 router.get('/', async (req, res) => {
   try {
     // Build filter object from query parameters
@@ -14,7 +13,7 @@ router.get('/', async (req, res) => {
         filter[key] = value;
       }
     }
-    
+
     const orders = await Order.find(filter).populate('items.product_id');
     res.status(200).json(orders);
   } catch (err) {
@@ -22,7 +21,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET order by ID
 router.get('/:id', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate('items.product_id');
@@ -35,134 +33,104 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// CREATE a new order
 router.post('/', async (req, res) => {
   try {
-    const { 
-      customer_name, 
-      phone_number, 
-      shipping_address, 
-      customer_fb_id,
-      quantity,
-      product_id,
-      items, 
-      status 
-    } = req.body;
-
-    // Support both single product and multiple items
-    let total_amount = 0;
-    let orderData = {
+    const {
       customer_name,
       phone_number,
       shipping_address,
       customer_fb_id,
-      status: status || 'Pending'
-    };
+      items,
+      status
+    } = req.body;
 
-    // Handle multiple items (array)
-    if (items && items.length > 0) {
-      if (!customer_name) {
-        return res.status(400).json({ error: 'Missing required field: customer_name' });
-      }
-
-      // Calculate total amount for items
-      for (const item of items) {
-        const product = await Product.findById(item.product_id);
-        if (!product) {
-          return res.status(404).json({ error: `Product with ID ${item.product_id} not found` });
-        }
-        // Use provided price or get from product
-        const price = item.price || product.price;
-        total_amount += price * item.quantity;
-      }
-      orderData.items = items;
-      orderData.total_amount = total_amount;
-    }
-    // Handle single product order
-    else if (product_id && quantity) {
-      if (!customer_name) {
-        return res.status(400).json({ error: 'Missing required field: customer_name' });
-      }
-
-      const product = await Product.findById(product_id);
-      if (!product) {
-        return res.status(404).json({ error: `Product with ID ${product_id} not found` });
-      }
-
-      total_amount = product.price * quantity;
-      orderData.product_id = product_id;
-      orderData.quantity = quantity;
-      orderData.total_amount = total_amount;
-    }
-    // No items or product specified
-    else {
+    // Validate required fields
+    if (!customer_name || !items || items.length === 0) {
       return res.status(400).json({ 
-        error: 'Missing required fields: either items array or (product_id + quantity)' 
+        error: 'Missing required fields: customer_name, items (non-empty array)' 
       });
     }
 
-    const newOrder = new Order(orderData);
+    // Validate items and set prices from products if not provided
+    for (const item of items) {
+      if (!item.product_id || item.quantity === undefined) {
+        return res.status(400).json({ 
+          error: 'Each item must have product_id and quantity' 
+        });
+      }
+
+      const product = await Product.findById(item.product_id);
+      if (!product) {
+        return res.status(404).json({ error: `Product with ID ${item.product_id} not found` });
+      }
+      
+      // Use provided price or get from product
+      if (!item.price) {
+        item.price = product.price;
+      }
+    }
+
+    const newOrder = new Order({
+      customer_name,
+      phone_number,
+      shipping_address,
+      customer_fb_id,
+      items,
+      status: status || 'Pending'
+    });
+
     const savedOrder = await newOrder.save();
-    const populatedOrder = await savedOrder.populate('items.product_id product_id');
+    const populatedOrder = await savedOrder.populate('items.product_id');
     res.status(201).json(populatedOrder);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// UPDATE an order
 router.put('/:id', async (req, res) => {
   try {
-    const { 
-      customer_name, 
-      phone_number, 
-      shipping_address, 
+    const {
+      customer_name,
+      phone_number,
+      shipping_address,
       customer_fb_id,
-      quantity,
-      product_id,
-      items, 
-      status 
+      items,
+      status
     } = req.body;
 
-    let updateData = { 
-      customer_name, 
-      phone_number, 
-      shipping_address, 
-      customer_fb_id,
-      status, 
-      updatedAt: Date.now() 
+    let updateData = {
+      updatedAt: Date.now()
     };
 
-    // If items are being updated, recalculate total
+    // Add fields if provided
+    if (customer_name !== undefined) updateData.customer_name = customer_name;
+    if (phone_number !== undefined) updateData.phone_number = phone_number;
+    if (shipping_address !== undefined) updateData.shipping_address = shipping_address;
+    if (customer_fb_id !== undefined) updateData.customer_fb_id = customer_fb_id;
+    if (status !== undefined) updateData.status = status;
+
+    // If items are being updated, validate and set prices
     if (items && items.length > 0) {
-      let total_amount = 0;
       for (const item of items) {
+        if (!item.product_id || item.quantity === undefined) {
+          return res.status(400).json({ 
+            error: 'Each item must have product_id and quantity' 
+          });
+        }
+
         const product = await Product.findById(item.product_id);
         if (!product) {
           return res.status(404).json({ error: `Product with ID ${item.product_id} not found` });
         }
-        const price = item.price || product.price;
-        total_amount += price * item.quantity;
       }
       updateData.items = items;
-      updateData.total_amount = total_amount;
-    }
-    // If single product is being updated
-    else if (product_id && quantity) {
-      const product = await Product.findById(product_id);
-      if (!product) {
-        return res.status(404).json({ error: `Product with ID ${product_id} not found` });
-      }
-      updateData.product_id = product_id;
-      updateData.quantity = quantity;
-      updateData.total_amount = product.price * quantity;
     }
 
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('items.product_id product_id');
+    ).populate('items.product_id');
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });

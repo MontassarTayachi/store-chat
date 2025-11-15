@@ -29,7 +29,7 @@ async function loadOrders() {
     try {
         const response = await fetch(ORDERS_API);
         if (!response.ok) throw new Error('Failed to fetch orders');
-        
+
         const orders = await response.json();
         console.log('Fetched orders:', orders);
         displayOrders(orders);
@@ -49,10 +49,10 @@ async function applyFilter() {
         if (status) {
             url += `?status=${status}`;
         }
-        
+
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch orders');
-        
+
         const orders = await response.json();
         displayOrders(orders);
     } catch (error) {
@@ -65,14 +65,14 @@ async function applyFilter() {
 
 function displayOrders(orders) {
     ordersContainer.innerHTML = '';
-    
+
     if (orders.length === 0) {
         emptyState.style.display = 'block';
         return;
     }
-    
+
     emptyState.style.display = 'none';
-    
+
     orders.forEach(order => {
         const orderCard = createOrderCard(order);
         ordersContainer.appendChild(orderCard);
@@ -82,7 +82,7 @@ function displayOrders(orders) {
 function createOrderCard(order) {
     const card = document.createElement('div');
     card.className = 'order-card';
-    
+
     const statusClass = `status-${order.status.toLowerCase()}`;
     const orderDate = new Date(order.order_date).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -91,24 +91,26 @@ function createOrderCard(order) {
         hour: '2-digit',
         minute: '2-digit'
     });
-    
+
     let itemsHTML = '';
+    let totalAmount = 0;
     if (order.items && order.items.length > 0) {
         itemsHTML = order.items.map(item => {
             const productName = item.product_id?.name || 'Unknown Product';
             const price = item.price ?? 0;
+            totalAmount += price * item.quantity;
             return `<div class="item">
                 <strong>${productName}</strong> - Qty: ${item.quantity} × $${price.toFixed(2)}
             </div>`;
         }).join('');
     }
-    
+
     card.innerHTML = `
         <div class="order-header">
             <div class="order-id">Order #${order._id.substring(0, 8)}</div>
             <span class="status-badge ${statusClass}">${order.status}</span>
         </div>
-        
+
         <div class="order-info">
             <div class="info-row">
                 <span class="info-label">Customer:</span>
@@ -120,15 +122,15 @@ function createOrderCard(order) {
             </div>
             <div class="info-row">
                 <span class="info-label">Total Amount:</span>
-                <span class="info-value" style="font-weight: 600; color: #667eea;">$${(order.total_amount ?? 0).toFixed(2)}</span>
+                <span class="info-value" style="font-weight: 600; color: #667eea;">$${totalAmount.toFixed(2)}</span>
             </div>
         </div>
-        
+
         <div class="items-list">
             <h4>📦 Items</h4>
             ${itemsHTML}
         </div>
-        
+
         <div class="order-actions">
             ${order.status === 'Pending' ? `
                 <button class="btn btn-accept" onclick="acceptOrder('${order._id}')">✓ Accept</button>
@@ -138,13 +140,13 @@ function createOrderCard(order) {
             `}
         </div>
     `;
-    
+
     return card;
 }
 
 async function acceptOrder(orderId) {
     if (!confirm('Are you sure you want to accept this order?')) return;
-    
+
     try {
         const response = await fetch(`${ORDERS_API}/${orderId}`, {
             method: 'PATCH',
@@ -153,9 +155,9 @@ async function acceptOrder(orderId) {
             },
             body: JSON.stringify({ status: 'Shipped' })
         });
-        
+
         if (!response.ok) throw new Error('Failed to accept order');
-        
+
         showSuccess('Order accepted successfully!');
         loadOrders();
     } catch (error) {
@@ -166,7 +168,7 @@ async function acceptOrder(orderId) {
 
 async function refuseOrder(orderId) {
     if (!confirm('Are you sure you want to refuse this order?')) return;
-    
+
     try {
         const response = await fetch(`${ORDERS_API}/${orderId}`, {
             method: 'PATCH',
@@ -175,9 +177,9 @@ async function refuseOrder(orderId) {
             },
             body: JSON.stringify({ status: 'Cancelled' })
         });
-        
+
         if (!response.ok) throw new Error('Failed to refuse order');
-        
+
         showSuccess('Order refused successfully!');
         loadOrders();
     } catch (error) {
@@ -190,10 +192,10 @@ async function showOrderDetails(orderId) {
     try {
         const response = await fetch(`${ORDERS_API}/${orderId}`);
         if (!response.ok) throw new Error('Failed to fetch order details');
-        
+
         const order = await response.json();
         const modalBody = document.getElementById('modalBody');
-        
+
         const orderDate = new Date(order.order_date).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -201,12 +203,14 @@ async function showOrderDetails(orderId) {
             hour: '2-digit',
             minute: '2-digit'
         });
-        
+
         let itemsHTML = '';
+        let totalAmount = 0;
         if (order.items && order.items.length > 0) {
             itemsHTML = order.items.map(item => {
                 const productName = item.product_id?.name || 'Unknown Product';
                 const price = item.price ?? 0;
+                totalAmount += item.quantity * price;
                 return `<tr>
                     <td>${productName}</td>
                     <td>${item.quantity}</td>
@@ -215,7 +219,7 @@ async function showOrderDetails(orderId) {
                 </tr>`;
             }).join('');
         }
-        
+
         modalBody.innerHTML = `
             <div style="margin-bottom: 20px;">
                 <p><strong>Order ID:</strong> ${order._id}</p>
@@ -223,7 +227,7 @@ async function showOrderDetails(orderId) {
                 <p><strong>Status:</strong> <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></p>
                 <p><strong>Order Date:</strong> ${orderDate}</p>
             </div>
-            
+
             <div style="margin-bottom: 20px;">
                 <h3>Items</h3>
                 <table style="width: 100%; border-collapse: collapse;">
@@ -240,12 +244,12 @@ async function showOrderDetails(orderId) {
                     </tbody>
                 </table>
             </div>
-            
+
             <div style="text-align: right; padding-top: 15px; border-top: 2px solid #e0e0e0;">
-                <p style="font-size: 1.2em;"><strong>Total Amount: $${(order.total_amount ?? 0).toFixed(2)}</strong></p>
+                <p style="font-size: 1.2em;"><strong>Total Amount: $${totalAmount.toFixed(2)}</strong></p>
             </div>
         `;
-        
+
         modal.style.display = 'block';
     } catch (error) {
         console.error('Error fetching order details:', error);
@@ -266,9 +270,9 @@ function showSuccess(message) {
     successMsg.className = 'success-message';
     successMsg.textContent = message;
     successMsg.style.display = 'block';
-    
+
     ordersContainer.parentElement.insertBefore(successMsg, ordersContainer);
-    
+
     setTimeout(() => successMsg.remove(), 3000);
 }
 
@@ -277,8 +281,8 @@ function showError(message) {
     errorMsg.className = 'error-message';
     errorMsg.textContent = message;
     errorMsg.style.display = 'block';
-    
+
     ordersContainer.parentElement.insertBefore(errorMsg, ordersContainer);
-    
+
     setTimeout(() => errorMsg.remove(), 3000);
 }

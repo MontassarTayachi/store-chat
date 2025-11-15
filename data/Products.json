@@ -1,82 +1,72 @@
 [
-  {
-    "product_id": 1,
-    "name": "Wireless Mouse",
-    "description": "Ergonomic wireless mouse with 2.4GHz connection and long battery life.",
-    "price": 19.99,
-    "stock": 120,
-    "category": "Electronics"
-  },
-  {
-    "product_id": 2,
-    "name": "Mechanical Keyboard",
-    "description": "RGB backlit mechanical keyboard with blue switches.",
-    "price": 59.99,
-    "stock": 80,
-    "category": "Electronics"
-  },
-  {
-    "product_id": 3,
-    "name": "Noise Cancelling Headphones",
-    "description": "Over-ear headphones with active noise cancellation and 20-hour battery.",
-    "price": 89.99,
-    "stock": 50,
-    "category": "Audio"
-  },
-  {
-    "product_id": 4,
-    "name": "Smartwatch",
-    "description": "Water-resistant smartwatch with fitness tracking and notifications.",
-    "price": 129.99,
-    "stock": 35,
-    "category": "Wearables"
-  },
-  {
-    "product_id": 5,
-    "name": "USB-C Charger",
-    "description": "Fast charging 65W USB-C wall charger for laptops and phones.",
-    "price": 24.99,
-    "stock": 200,
-    "category": "Accessories"
-  },
-  {
-    "product_id": 6,
-    "name": "Gaming Chair",
-    "description": "Adjustable ergonomic gaming chair with lumbar support.",
-    "price": 199.99,
-    "stock": 25,
-    "category": "Furniture"
-  },
-  {
-    "product_id": 7,
-    "name": "LED Monitor 27-inch",
-    "description": "Full HD 1080p LED monitor with HDMI and DisplayPort inputs.",
-    "price": 179.99,
-    "stock": 40,
-    "category": "Electronics"
-  },
-  {
-    "product_id": 8,
-    "name": "External SSD 1TB",
-    "description": "Portable solid-state drive with USB 3.2 interface.",
-    "price": 129.49,
-    "stock": 60,
-    "category": "Storage"
-  },
-  {
-    "product_id": 9,
-    "name": "Bluetooth Speaker",
-    "description": "Compact waterproof Bluetooth speaker with deep bass.",
-    "price": 39.99,
-    "stock": 90,
-    "category": "Audio"
-  },
-  {
-    "product_id": 10,
-    "name": "Laptop Stand",
-    "description": "Adjustable aluminum stand compatible with all laptops up to 17 inches.",
-    "price": 29.99,
-    "stock": 75,
-    "category": "Accessories"
-  }
+    {
+        "name": "Wireless Mouse",
+        "description": "Ergonomic wireless mouse with 2.4GHz connection and long battery life.",
+        "price": 19.99,
+        "stock": 120,
+        "category": "Electronics"
+    },
+    {
+        "name": "Mechanical Keyboard",
+        "description": "RGB backlit mechanical keyboard with blue switches.",
+        "price": 59.99,
+        "stock": 80,
+        "category": "Electronics"
+    },
+    {
+        "name": "Noise Cancelling Headphones",
+        "description": "Over-ear headphones with active noise cancellation and 20-hour battery.",
+        "price": 89.99,
+        "stock": 50,
+        "category": "Audio"
+    },
+    {
+        "name": "Smartwatch",
+        "description": "Water-resistant smartwatch with fitness tracking and notifications.",
+        "price": 129.99,
+        "stock": 35,
+        "category": "Wearables"
+    },
+    {
+        "name": "USB-C Charger",
+        "description": "Fast charging 65W USB-C wall charger for laptops and phones.",
+        "price": 24.99,
+        "stock": 200,
+        "category": "Accessories"
+    },
+    {
+        "name": "Gaming Chair",
+        "description": "Adjustable ergonomic gaming chair with lumbar support.",
+        "price": 199.99,
+        "stock": 25,
+        "category": "Furniture"
+    },
+    {
+        "name": "LED Monitor 27-inch",
+        "description": "Full HD 1080p LED monitor with HDMI and DisplayPort inputs.",
+        "price": 179.99,
+        "stock": 40,
+        "category": "Electronics"
+    },
+    {
+        "name": "External SSD 1TB",
+        "description": "Portable solid-state drive with USB 3.2 interface.",
+        "price": 129.49,
+        "stock": 60,
+        "category": "Storage"
+    },
+    {
+        "name": "Bluetooth Speaker",
+        "description": "Compact waterproof Bluetooth speaker with deep bass.",
+        "price": 39.99,
+        "stock": 90,
+        "category": "Audio"
+    },
+    {
+        "name": "Laptop Stand",
+        "description": "Adjustable aluminum stand compatible with all laptops up to 17 inches.",
+        "price": 29.99,
+        "stock": 75,
+        "category": "Accessories"
+    }
 ]

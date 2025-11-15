@@ -1,30 +1,80 @@
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const mongoose = require('mongoose');
+
+const Product = require('./models/Product');
+const Order = require('./models/Order');
+const Delivery = require('./models/Delivery');
+const Reclamation = require('./models/Reclamation');
+
 const productsData = require('./data/Products.json');
 const ordersData = require('./data/Orders.json');
 const deliveryData = require('./data/Delivery.json');
 
-const uri = process.env.MONGODB_URI || 'mongodb+srv://yassine:yassine@cluster0.jl8x5li.mongodb.net/magasin_tayachi?retryWrites=true&w=majority';
+const DATABASE_URL = process.env.DATABASE_URL;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+async function insertData() {
+    try {
+        // Connect to MongoDB
+        await mongoose.connect(DATABASE_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log('Connected to MongoDB');
 
+        // Clear existing data (optional - comment out if you don't want to clear)
+        await Product.deleteMany({});
+        await Order.deleteMany({});
+        await Delivery.deleteMany({});
+        await Reclamation.deleteMany({});
+        console.log('Cleared existing data');
 
-async function run() {
-  try {
-    await client.connect();
-    await client.db('magasin_tayachi').collection('products').insertMany(productsData);
-    await client.db('magasin_tayachi').collection('orders').insertMany(ordersData);
-    await client.db('magasin_tayachi').collection('deliveries').insertMany(deliveryData);
-  } finally {
-    await client.close();
-  }
+        // Insert Products
+        const insertedProducts = await Product.insertMany(productsData);
+        console.log(`Inserted ${insertedProducts.length} products`);
+
+        // Create a mapping of placeholder IDs to actual MongoDB ObjectIds
+        // Map product indices to ObjectIds (PRODUCT_ID_1 -> insertedProducts[0]._id)
+        const productIdMap = {};
+        insertedProducts.forEach((product, index) => {
+            productIdMap[`PRODUCT_ID_${index + 1}`] = product._id;
+        });
+
+        // Insert Orders with items referencing the actual product ObjectIds
+        const processedOrders = ordersData.map(order => ({
+            ...order,
+            items: order.items?.map(item => ({
+                product_id: productIdMap[item.product_id], // Replace placeholder with actual ObjectId
+                quantity: item.quantity,
+                price: item.price
+            })) || []
+        }));
+
+        const insertedOrders = await Order.insertMany(processedOrders);
+        console.log(`Inserted ${insertedOrders.length} orders`);
+
+        // Create a mapping of placeholder order IDs to actual MongoDB ObjectIds
+        const orderIdMap = {};
+        insertedOrders.forEach((order, index) => {
+            orderIdMap[`ORDER_ID_${index + 1}`] = order._id;
+        });
+
+        // Insert Deliveries with order references (actual ObjectIds)
+        const processedDeliveries = deliveryData.map(delivery => ({
+            ...delivery,
+            order_id: orderIdMap[delivery.order_id] // Replace placeholder with actual ObjectId
+        }));
+
+        const insertedDeliveries = await Delivery.insertMany(processedDeliveries);
+        console.log(`Inserted ${insertedDeliveries.length} deliveries`);
+
+        console.log('\n✨ Database seeding completed successfully!');
+        process.exit(0);
+    } catch (error) {
+        console.error('Error inserting data:', error.message);
+        process.exit(1);
+    } finally {
+        await mongoose.connection.close();
+    }
 }
 
-run().catch(console.dir);
+insertData();

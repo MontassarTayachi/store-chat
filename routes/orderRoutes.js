@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const orders = await Order.find(filter).populate('items.product_id');
+    const orders = await Order.find(filter);
     res.status(200).json(orders);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate('items.product_id');
+    const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -53,15 +53,15 @@ router.post('/', async (req, res) => {
 
     // Validate items and set prices from products if not provided
     for (const item of items) {
-      if (!item.product_id || item.quantity === undefined) {
+      if (!item.product_reference || item.quantity === undefined) {
         return res.status(400).json({ 
-          error: 'Each item must have product_id and quantity' 
+          error: 'Each item must have product_reference and quantity' 
         });
       }
 
-      const product = await Product.findById(item.product_id);
+      const product = await Product.findOne({ reference: item.product_reference });
       if (!product) {
-        return res.status(404).json({ error: `Product with ID ${item.product_id} not found` });
+        return res.status(404).json({ error: `Product with reference ${item.product_reference} not found` });
       }
       
       // Use provided price or get from product
@@ -80,8 +80,7 @@ router.post('/', async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
-    const populatedOrder = await savedOrder.populate('items.product_id');
-    res.status(201).json(populatedOrder);
+    res.status(201).json(savedOrder);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -112,15 +111,15 @@ router.put('/:id', async (req, res) => {
     // If items are being updated, validate and set prices
     if (items && items.length > 0) {
       for (const item of items) {
-        if (!item.product_id || item.quantity === undefined) {
+        if (!item.product_reference || item.quantity === undefined) {
           return res.status(400).json({ 
-            error: 'Each item must have product_id and quantity' 
+            error: 'Each item must have product_reference and quantity' 
           });
         }
 
-        const product = await Product.findById(item.product_id);
+        const product = await Product.findOne({ reference: item.product_reference });
         if (!product) {
-          return res.status(404).json({ error: `Product with ID ${item.product_id} not found` });
+          return res.status(404).json({ error: `Product with reference ${item.product_reference} not found` });
         }
       }
       updateData.items = items;
@@ -130,7 +129,7 @@ router.put('/:id', async (req, res) => {
       req.params.id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('items.product_id');
+    );
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
@@ -160,7 +159,7 @@ router.patch('/:id', async (req, res) => {
       req.params.id,
       { status, updatedAt: Date.now() },
       { new: true, runValidators: true }
-    ).populate('items.product_id');
+    );
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });

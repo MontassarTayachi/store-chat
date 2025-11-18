@@ -32,18 +32,12 @@ async function insertData() {
         const insertedProducts = await Product.insertMany(productsData);
         console.log(`Inserted ${insertedProducts.length} products`);
 
-        // Create a mapping of placeholder IDs to actual MongoDB ObjectIds
-        // Map product indices to ObjectIds (PRODUCT_ID_1 -> insertedProducts[0]._id)
-        const productIdMap = {};
-        insertedProducts.forEach((product, index) => {
-            productIdMap[`PRODUCT_ID_${index + 1}`] = product._id;
-        });
-
-        // Insert Orders with items referencing the actual product ObjectIds
+        // No need for product ID mapping anymore since we're using product_reference (string) directly
+        // Insert Orders with items referencing product reference strings
         const processedOrders = ordersData.map(order => ({
             ...order,
             items: order.items?.map(item => ({
-                product_id: productIdMap[item.product_id], // Replace placeholder with actual ObjectId
+                product_reference: item.product_reference, // Use product reference directly
                 quantity: item.quantity,
                 price: item.price
             })) || []

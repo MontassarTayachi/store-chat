@@ -24,9 +24,9 @@ const orderSchema = new mongoose.Schema({
     // multiple products
     items: [
         {
-            product_id: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product'
+            product_reference: {
+                type: String,
+                required: true
             },
             quantity: {
                 type: Number,

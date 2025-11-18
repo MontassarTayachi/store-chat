@@ -96,7 +96,7 @@ function createOrderCard(order) {
     let totalAmount = 0;
     if (order.items && order.items.length > 0) {
         itemsHTML = order.items.map(item => {
-            const productName = item.product_reference || 'Unknown Product';
+            const productName = item.ref || 'Unknown Product';
             const price = item.price ?? 0;
             totalAmount += price * item.quantity;
             return `<div class="item">
@@ -208,7 +208,7 @@ async function showOrderDetails(orderId) {
         let totalAmount = 0;
         if (order.items && order.items.length > 0) {
             itemsHTML = order.items.map(item => {
-                const productName = item.product_reference || 'Unknown Product';
+                const productName = item.ref || 'Unknown Product';
                 const price = item.price ?? 0;
                 totalAmount += item.quantity * price;
                 return `<tr>

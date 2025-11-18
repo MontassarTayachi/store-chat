@@ -53,15 +53,15 @@ router.post('/', async (req, res) => {
 
     // Validate items and set prices from products if not provided
     for (const item of items) {
-      if (!item.product_reference || item.quantity === undefined) {
+      if (!item.ref || item.quantity === undefined) {
         return res.status(400).json({ 
-          error: 'Each item must have product_reference and quantity' 
+          error: 'Each item must have ref and quantity' 
         });
       }
 
-      const product = await Product.findOne({ reference: item.product_reference });
+      const product = await Product.findOne({ reference: item.ref });
       if (!product) {
-        return res.status(404).json({ error: `Product with reference ${item.product_reference} not found` });
+        return res.status(404).json({ error: `Product with reference ${item.ref} not found` });
       }
       
       // Use provided price or get from product
@@ -111,15 +111,15 @@ router.put('/:id', async (req, res) => {
     // If items are being updated, validate and set prices
     if (items && items.length > 0) {
       for (const item of items) {
-        if (!item.product_reference || item.quantity === undefined) {
+        if (!item.ref || item.quantity === undefined) {
           return res.status(400).json({ 
-            error: 'Each item must have product_reference and quantity' 
+            error: 'Each item must have ref and quantity' 
           });
         }
 
-        const product = await Product.findOne({ reference: item.product_reference });
+        const product = await Product.findOne({ reference: item.ref });
         if (!product) {
-          return res.status(404).json({ error: `Product with reference ${item.product_reference} not found` });
+          return res.status(404).json({ error: `Product with reference ${item.ref} not found` });
         }
       }
       updateData.items = items;

@@ -32,12 +32,12 @@ async function insertData() {
         const insertedProducts = await Product.insertMany(productsData);
         console.log(`Inserted ${insertedProducts.length} products`);
 
-        // No need for product ID mapping anymore since we're using product_reference (string) directly
+        // No need for product ID mapping anymore since we're using ref (string) directly
         // Insert Orders with items referencing product reference strings
         const processedOrders = ordersData.map(order => ({
             ...order,
             items: order.items?.map(item => ({
-                product_reference: item.product_reference, // Use product reference directly
+                ref: item.ref, // Use product reference directly
                 quantity: item.quantity,
                 price: item.price
             })) || []

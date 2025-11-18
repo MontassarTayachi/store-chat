@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
     // multiple products
     items: [
         {
-            product_reference: {
+            ref: {
                 type: String,
                 required: true
             },

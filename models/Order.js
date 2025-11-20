@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const WEBHOOK_URL = process.env.WEBHOOK_URL;
+
 const orderSchema = new mongoose.Schema({
     customer_name: {
         type: String,
@@ -65,5 +67,41 @@ orderSchema.virtual('total_amount').get(function() {
 // Ensure virtuals are included in JSON serialization
 orderSchema.set('toJSON', { virtuals: true });
 orderSchema.set('toObject', { virtuals: true });
+
+// Post-save hook to trigger webhook on status changes
+orderSchema.post('save', async function(doc) {
+    // Check if this is an update by checking if the document has been modified
+    if (!this.isNew) {
+        // Get the original document from database before this save
+        const originalDoc = await this.constructor.findById(this._id);
+        
+        // Check if status changed
+        if (originalDoc && originalDoc.status !== this.status) {
+            console.log(`[Webhook] Order ${this._id}: Status changed from ${originalDoc.status} to ${this.status}`);
+            
+            // Send webhook for status change
+            if (WEBHOOK_URL) {
+                try {
+                    await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            event: 'order_status_changed',
+                            order_id: this._id,
+                            customer_name: this.customer_name,
+                            phone_number: this.phone_number,
+                            old_status: originalDoc.status,
+                            new_status: this.status,
+                            total_amount: this.total_amount,
+                            timestamp: new Date()
+                        })
+                    });
+                } catch (err) {
+                    console.error('Error sending order status webhook:', err.message);
+                }
+            }
+        }
+    }
+});
 
 module.exports = mongoose.model('Order', orderSchema, 'orders');

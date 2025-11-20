@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 
 const deliverySchema = new mongoose.Schema({
+    reference: {
+        type: String,
+        unique: true,
+        required: true,
+        trim: true
+    },
     order_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order',
@@ -28,6 +34,17 @@ const deliverySchema = new mongoose.Schema({
     }
 });
 
+// Pre-save hook to generate reference if not provided
+deliverySchema.pre('save', async function(next) {
+    if (!this.reference) {
+        // Generate a unique reference: DEL-{timestamp}-{random}
+        const timestamp = Date.now().toString().slice(-6);
+        const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+        this.reference = `DEL-${timestamp}-${random}`;
+    }
+    next();
+});
+
 // Post-save hook to trigger webhook on status or location changes
 deliverySchema.post('save', async function(doc) {
     // Check if this is an update by checking if the document has been modified
@@ -48,6 +65,7 @@ deliverySchema.post('save', async function(doc) {
                         body: JSON.stringify({
                             event: 'delivery_status_changed',
                             delivery_id: this._id,
+                            delivery_reference: this.reference,
                             old_status: originalDoc.status,
                             new_status: this.status,
                             timestamp: new Date()
@@ -72,6 +90,7 @@ deliverySchema.post('save', async function(doc) {
                         body: JSON.stringify({
                             event: 'delivery_location_changed',
                             delivery_id: this._id,
+                            delivery_reference: this.reference,
                             old_location: originalDoc.location,
                             new_location: this.location,
                             timestamp: new Date()

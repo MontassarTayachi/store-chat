@@ -23,7 +23,13 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const delivery = await Delivery.findById(req.params.id).populate('order_id');
+        // Try to find by reference first, then by MongoDB ID
+        let delivery = await Delivery.findOne({ reference: req.params.id }).populate('order_id');
+        
+        if (!delivery) {
+            delivery = await Delivery.findById(req.params.id).populate('order_id');
+        }
+        
         if (!delivery) {
             return res.status(404).json({ error: 'Delivery not found' });
         }
@@ -61,7 +67,7 @@ router.get('/phone/:phone_number', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const { order_id, status, location } = req.body;
+        const { order_id, reference, status, location } = req.body;
 
         if (!order_id) {
             return res.status(400).json({ error: 'Missing required field: order_id' });
@@ -74,6 +80,7 @@ router.post('/', async (req, res) => {
         }
 
         const newDelivery = new Delivery({
+            reference,
             order_id,
             status: status || 'Preparing',
             location: location || 'Warehouse'

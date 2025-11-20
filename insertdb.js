@@ -8,7 +8,7 @@ const Reclamation = require('./models/Reclamation');
 
 const productsData = require('./data/Products.json');
 const ordersData = require('./data/Orders.json');
-const deliveryData = require('./data/Delivery.json');
+const deliveriesData = require('./data/Deliveries.json');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -53,7 +53,7 @@ async function insertData() {
         });
 
         // Insert Deliveries with order references (actual ObjectIds)
-        const processedDeliveries = deliveryData.map(delivery => ({
+        const processedDeliveries = deliveriesData.map(delivery => ({
             ...delivery,
             order_id: orderIdMap[delivery.order_id] // Replace placeholder with actual ObjectId
         }));

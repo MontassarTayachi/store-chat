@@ -33,16 +33,27 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.get('/track/:tracking_number', async (req, res) => {
+router.get('/phone/:phone_number', async (req, res) => {
     try {
-        const delivery = await Delivery.findOne({
-            tracking_number: req.params.tracking_number
+        // Find orders by phone number, then find their deliveries
+        const orders = await Order.find({
+            phone_number: req.params.phone_number
+        });
+
+        if (!orders || orders.length === 0) {
+            return res.status(404).json({ error: 'No orders found for this phone number' });
+        }
+
+        const orderIds = orders.map(order => order._id);
+        const deliveries = await Delivery.find({
+            order_id: { $in: orderIds }
         }).populate('order_id');
 
-        if (!delivery) {
-            return res.status(404).json({ error: 'Delivery not found' });
+        if (!deliveries || deliveries.length === 0) {
+            return res.status(404).json({ error: 'No deliveries found for this phone number' });
         }
-        res.status(200).json(delivery);
+
+        res.status(200).json(deliveries);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -50,7 +61,7 @@ router.get('/track/:tracking_number', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const { order_id, tracking_number, delivery_status, estimated_arrival } = req.body;
+        const { order_id, status, location } = req.body;
 
         if (!order_id) {
             return res.status(400).json({ error: 'Missing required field: order_id' });
@@ -64,9 +75,8 @@ router.post('/', async (req, res) => {
 
         const newDelivery = new Delivery({
             order_id,
-            tracking_number,
-            delivery_status: delivery_status || 'Preparing',
-            estimated_arrival
+            status: status || 'Preparing',
+            location: location || 'Warehouse'
         });
 
         const savedDelivery = await newDelivery.save();
@@ -79,26 +89,23 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        const { delivery_status, estimated_arrival, delivered_date } = req.body;
+        const { status, location } = req.body;
+
+        const updateData = {
+            updatedAt: Date.now()
+        };
+
+        if (status !== undefined) updateData.status = status;
+        if (location !== undefined) updateData.location = location;
 
         const delivery = await Delivery.findByIdAndUpdate(
             req.params.id,
-            {
-                delivery_status,
-                estimated_arrival,
-                delivered_date,
-                updatedAt: Date.now()
-            },
+            updateData,
             { new: true, runValidators: true }
         ).populate('order_id');
 
         if (!delivery) {
             return res.status(404).json({ error: 'Delivery not found' });
-        }
-
-        // If delivery is marked as delivered, update order status
-        if (delivery_status === 'Delivered' && delivery.order_id) {
-            await Order.findByIdAndUpdate(delivery.order_id, { status: 'Delivered' });
         }
 
         res.status(200).json(delivery);

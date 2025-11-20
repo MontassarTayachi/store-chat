@@ -1,0 +1,27 @@
+[
+    {
+        "order_id": "ORDER_ID_1",
+        "status": "In Transit",
+        "location": "Distribution Center - Manhattan"
+    },
+    {
+        "order_id": "ORDER_ID_2",
+        "status": "Out for Delivery",
+        "location": "Local Delivery Hub - Los Angeles"
+    },
+    {
+        "order_id": "ORDER_ID_3",
+        "status": "Delivered",
+        "location": "Delivered to Recipient"
+    },
+    {
+        "order_id": "ORDER_ID_4",
+        "status": "Preparing",
+        "location": "Warehouse"
+    },
+    {
+        "order_id": "ORDER_ID_5",
+        "status": "Shipped",
+        "location": "Regional Hub - Phoenix"
+    }
+]

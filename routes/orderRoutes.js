@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const Delivery = require('../models/Delivery');
 
 router.get('/', async (req, res) => {
   try {
@@ -163,6 +164,22 @@ router.patch('/:id', async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // When order is accepted (status becomes 'Shipped'), create a delivery
+    if (status === 'Shipped') {
+      try {
+        const newDelivery = new Delivery({
+          order_id: order._id,
+          status: 'Preparing',
+          location: 'Warehouse'
+        });
+
+        const savedDelivery = await newDelivery.save();
+        console.log('Delivery created for order:', order._id);
+      } catch (err) {
+        console.error('Error creating delivery:', err.message);
+      }
     }
 
     res.status(200).json(order);

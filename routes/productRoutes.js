@@ -1,100 +1,57 @@
 const express = require('express');
+
+const Product = require('../models/Product.js');
+const ReferenceGenerator = require('../models/ReferenceGenerator.js')
+const { getFilter } = require('../utils/utils.js');
+
 const router = express.Router();
-const Product = require('../models/Product');
 
-router.get('/', async (req, res) => {
-    try {
-        const filter = {};
-        for (const [key, value] of Object.entries(req.query)) {
-            // Ignore parameters with null value or 'null' string
-            if (value !== null && value !== 'null' && value !== '') {
-                filter[key] = value;
-            }
-        }
-
-        const products = await Product.find(filter);
-        res.status(200).json(products);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+router.get('/', (req, res) => {
+    const filter = getFilter(req.query);
+    Product.find(filter)
+        .then(products => res.status(200).json(products))
+        .catch(err => res.status(500).json({ error: err.message }));
 });
 
-router.get('/:id', async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-        res.status(200).json(product);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+router.get('/:id', (req, res) => {
+    Product.findById(req.params.id)
+        .then(product => {
+            if (!product) res.status(404).json({ error: 'Product not found' });
+            else res.status(200).json(product);
+        })
+        .catch(err => res.status(500).json({ error: err.message }));
 });
 
 router.post('/', async (req, res) => {
     try {
-        const { reference, name, description, price, stock, category } = req.body;
-
-        if (!reference || !name || price === undefined || stock === undefined) {
-            return res.status(400).json({ error: 'Missing required fields: reference, name, price, stock' });
-        }
-
-        const newProduct = new Product({
-            reference,
-            name,
-            description,
-            price,
-            stock,
-            category
-        });
-
+        const referenceValue = await ReferenceGenerator.getNextReference('Product');
+        const reference = `PROD-${referenceValue}`;
+        const newProduct = new Product({ ...req.body, reference });
         const savedProduct = await newProduct.save();
         res.status(201).json(savedProduct);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message })
     }
 });
 
-router.put('/:id', async (req, res) => {
-    try {
-        const { reference, name, description, price, stock, category } = req.body;
-
-        const product = await Product.findByIdAndUpdate(
-            req.params.id,
-            {
-                reference,
-                name,
-                description,
-                price,
-                stock,
-                category,
-                updatedAt: Date.now()
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        res.status(200).json(product);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+router.put('/:id', (req, res) => {
+    const updates = { ...req.body, updatedAt: Date.now() };
+    const options = { new: true, runValidators: true };
+    Product.findByIdAndUpdate(req.params.id, updates, options)
+        .then(product => {
+            if (!product) return res.status(404).json({ error: 'Product not found' });
+            res.status(200).json(product);
+        })
+        .catch(err => res.status(500).json({ error: err.message }));
 });
 
-router.delete('/:id', async (req, res) => {
-    try {
-        const product = await Product.findByIdAndDelete(req.params.id);
-
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        res.status(200).json({ message: 'Product deleted successfully', product });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+router.delete('/:id', (req, res) => {
+    Product.findByIdAndDelete(req.params.id)
+        .then(product => {
+            if (!product) return res.status(404).json({ error: 'Product not found' });
+            res.status(200).json({ message: 'Product deleted successfully', product });
+        })
+        .catch(err => res.status(500).json({ error: err.message }));
 });
 
 module.exports = router;

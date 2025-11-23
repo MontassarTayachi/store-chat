@@ -9,7 +9,6 @@ const deliveryRoutes = require('./routes/deliveryRoutes');
 // const reclamationRoutes = require('./routes/reclamationRoutes'); // note yet devoleped
 
 const app = express();
-const PORT = process.env.PORT;
 
 // Middleware
 app.use(cors());
@@ -18,15 +17,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // MongoDB Connection
-const MONGODB_URI = process.env.DATABASE_URL;
-mongoose.connect(MONGODB_URI, {
+mongoose.connect(process.env.DATABASE_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => {
-    console.log('MongoDB connected successfully!');
-}).catch(err => {
+}).then(() => console.log('MongoDB connected successfully!')).catch(err => {
     console.error('MongoDB connection error:', err);
-    throw err; // Stop the application if DB connection fails
+    throw err;
 });
 
 // Routes
@@ -36,6 +32,6 @@ app.use('/api/deliveries', deliveryRoutes);
 // app.use('/api/reclamations', reclamationRoutes);
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(process.env.PORT, () => {
+    console.log(`Server running on http://localhost:${process.env.PORT}`);
 });

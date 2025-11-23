@@ -6,6 +6,11 @@ const orderSchema = new mongoose.Schema({
         trim: true,
         required: true,
     },
+    customer_fb_id: {
+        type: String,
+        trim: true,
+        required: true,
+    },
     phone_number: {
         type: String,
         trim: true,
@@ -16,9 +21,10 @@ const orderSchema = new mongoose.Schema({
         trim: true,
         required: true,
     },
-    customer_fb_id: {
+    status: {
         type: String,
-        trim: true,
+        enum: ['Pending', 'Accepted', 'Cancelled'],
+        default: 'Pending',
         required: true,
     },
     order_date: {
@@ -44,12 +50,6 @@ const orderSchema = new mongoose.Schema({
             }
         }
     ],
-    status: {
-        type: String,
-        enum: ['Pending', 'Accepted', 'Cancelled'],
-        default: 'Pending',
-        required: true,
-    },
     createdAt: {
         type: Date,
         default: Date.now,

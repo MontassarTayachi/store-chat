@@ -1,74 +1,92 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const Product = require('./models/Product');
-const Order = require('./models/Order');
-const Delivery = require('./models/Delivery');
-const Reclamation = require('./models/Reclamation');
-
 const productsData = require('./data/Products.json');
 const ordersData = require('./data/Orders.json');
 const deliveriesData = require('./data/Deliveries.json');
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const ReferenceGenerator = require('./models/ReferenceGenerator.js');
 
-async function insertData() {
-    try {
-        // Connect to MongoDB
-        await mongoose.connect(DATABASE_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
-        console.log('Connected to MongoDB');
+mongoose.connect(process.env.DATABASE_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => console.log('MongoDB connected successfully!')).catch(err => {
+    console.error('MongoDB connection error:', err);
+    throw err;
+});
 
-        // Clear existing data (optional - comment out if you don't want to clear)
-        await Product.deleteMany({});
-        await Order.deleteMany({});
-        await Delivery.deleteMany({});
-        await Reclamation.deleteMany({});
-        console.log('Cleared existing data');
-
-        // Insert Products
-        const insertedProducts = await Product.insertMany(productsData);
-        console.log(`Inserted ${insertedProducts.length} products`);
-
-        // No need for product ID mapping anymore since we're using ref (string) directly
-        // Insert Orders with items referencing product reference strings
-        const processedOrders = ordersData.map(order => ({
-            ...order,
-            items: order.items?.map(item => ({
-                ref: item.ref, // Use product reference directly
-                quantity: item.quantity,
-                price: item.price
-            })) || []
-        }));
-
-        const insertedOrders = await Order.insertMany(processedOrders);
-        console.log(`Inserted ${insertedOrders.length} orders`);
-
-        // Create a mapping of placeholder order IDs to actual MongoDB ObjectIds
-        const orderIdMap = {};
-        insertedOrders.forEach((order, index) => {
-            orderIdMap[`ORDER_ID_${index + 1}`] = order._id;
-        });
-
-        // Insert Deliveries with order references (actual ObjectIds)
-        const processedDeliveries = deliveriesData.map(delivery => ({
-            ...delivery,
-            order_id: orderIdMap[delivery.order_id] // Replace placeholder with actual ObjectId
-        }));
-
-        const insertedDeliveries = await Delivery.insertMany(processedDeliveries);
-        console.log(`Inserted ${insertedDeliveries.length} deliveries`);
-
-        console.log('\n✨ Database seeding completed successfully!');
-        process.exit(0);
-    } catch (error) {
-        console.error('Error inserting data:', error.message);
-        process.exit(1);
-    } finally {
-        await mongoose.connection.close();
-    }
+function getRandomInt(min, max, inclusive = true) {
+    return Math.floor(Math.random() * (max - min + (inclusive ? 1 : 0))) + min;
 }
 
-insertData();
+function selectRandomElements(array, elementsCount, allowDuplicates = false) {
+    if (elementsCount > array.length && allowDuplicates == false) throw new Error('selectRandomElements: operation impossible');
+    const arr = [...array];
+    const result = [];
+    for (let i = 0; i < elementsCount; i++) {
+        const randomIndex = getRandomInt(0, arr.length, false);
+        result.push(arr[randomIndex]);
+        if (allowDuplicates == false) {
+            arr.splice(randomIndex, 1);
+        }
+    }
+    return result;
+}
+
+async function resetReferenceGenerator() {
+    await ReferenceGenerator.deleteMany({});
+}
+
+async function clearCollection(endpoint) {
+    let response = await fetch(`${process.env.LOCAL_SERVER_URL}/api/${endpoint}`);
+    const items = await response.json();
+    response = await Promise.all(items.map(item => {
+        return fetch(`${process.env.LOCAL_SERVER_URL}/api/${endpoint}/${item._id}`, { method: 'DELETE' });
+    }));
+    const deletedItems = await Promise.all(response.map(item => item.json()));
+}
+
+async function insertIntoCollection(endpoint, data) {
+    const response = await Promise.all(data.map(item => {
+        return fetch(`${process.env.LOCAL_SERVER_URL}/api/${endpoint}`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(item),
+        });
+    }));
+    const insertedData = await Promise.all(response.map(item => item.json()));
+    return insertedData;
+}
+
+async function main() {
+    console.log('deleting existing data ...');
+    await resetReferenceGenerator();
+    await clearCollection('products');
+    await clearCollection('orders');
+    await clearCollection('deliveries');
+    console.log('existing data deleted successfully');
+
+    console.log('inserting products data ...');
+    const products = await insertIntoCollection('products', productsData);
+    console.log('products data inserted successfully');
+
+    ordersData.forEach(order => {
+        const randomProducts = selectRandomElements(products, order.items.length, false);
+        order.items.forEach((item, itemIndex) => item.product_id = randomProducts[itemIndex]._id);
+    })
+    console.log('inserting orders data ...');
+    const orders = await insertIntoCollection('orders', ordersData);
+    console.log('orders data inserted successfully');
+
+    deliveriesData.forEach(delivery => {
+        const randomOrderIndex = getRandomInt(0, orders.length, false);
+        delivery.order_id = orders[randomOrderIndex];
+    })
+    console.log('inserting deliveries data ...');
+    const deliveries = await insertIntoCollection('deliveries', deliveriesData);
+    console.log('deliveries data inserted successfully');
+
+    await mongoose.disconnect();
+}
+
+main();

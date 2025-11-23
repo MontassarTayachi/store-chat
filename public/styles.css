@@ -199,12 +199,7 @@ header h1 {
     color: #92400e;
 }
 
-.status-shipped {
-    background: #bfdbfe;
-    color: #1e40af;
-}
-
-.status-delivered {
+.status-accepted {
     background: #bbf7d0;
     color: #065f46;
 }

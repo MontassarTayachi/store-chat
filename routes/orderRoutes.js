@@ -25,6 +25,7 @@ router.get('/:id', (req, res) => {
 });
 
 async function validateProductsExistance(req, res, next) {
+    if (!req.body.items) return next();
     const productIds = req.body.items.map(item => item.product_id);
     try {
         const count = await Product.countDocuments({ _id: { $in: productIds } });

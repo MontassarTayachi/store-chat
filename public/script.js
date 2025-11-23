@@ -149,11 +149,11 @@ async function acceptOrder(orderId) {
 
     try {
         const response = await fetch(`${ORDERS_API}/${orderId}`, {
-            method: 'PATCH',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ status: 'Shipped' })
+            body: JSON.stringify({ status: 'Accepted' })
         });
 
         if (!response.ok) throw new Error('Failed to accept order');
@@ -171,7 +171,7 @@ async function refuseOrder(orderId) {
 
     try {
         const response = await fetch(`${ORDERS_API}/${orderId}`, {
-            method: 'PATCH',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },

@@ -11,14 +11,18 @@ const reclamationSchema = new mongoose.Schema({
         trim: true,
         required: true,
     },
-    issue_description: {
+    issue_description: { // the client issue reclamed
         type: String,
         trim: true,
         required: true,
     },
+    response: { // the website admin response
+        type: String,
+        trim: true,
+    },
     status: {
         type: String,
-        enum: ['Open', 'In Progress', 'Resolved', 'Closed'],
+        enum: ['Open', 'In Progress', 'Closed'],
         default: 'Open',
     },
     order: { // a reclamation does not have to be related to an order, so it's not required

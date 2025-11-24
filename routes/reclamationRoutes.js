@@ -2,7 +2,7 @@ const express = require('express');
 
 const Order = require('../models/Order.js');
 const Reclamation = require('../models/Reclamation.js');
-const { getFilter } = require('../utils/utils.js');
+const { getFilter, sendWebhook } = require('../utils/utils.js');
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(500).json({ error: err.message }));
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', (req, res) => {
     Reclamation.findById(req.params.id)
         .then(reclamation => {
             if (!reclamation) res.status(404).json({ error: 'Reclamation not found' });
@@ -41,19 +41,26 @@ router.post('/', validateOrderExistance, (req, res) => {
         .catch(err => res.status(500).json({ error: err.message }));
 });
 
-// UPDATE a reclamation
 router.put('/:id', async (req, res) => {
-    const updates = { ...req.body, updatedAt: Date.now() };
-    const options = { new: true, runValidators: true };
-    Reclamation.findByIdAndUpdate(req.params.id, updates, options)
-        .then(reclamation => {
-            if (!reclamation) return res.status(404).json({ error: 'Reclamation not found' });
-            res.status(200).json(reclamation);
-        })
-        .catch(err => res.status(500).json({ error: err.message }));
+    let reclamation = null;
+    try {
+        const updates = { ...req.body, updatedAt: Date.now() };
+        const options = { new: true, runValidators: true };
+        reclamation = Reclamation.findByIdAndUpdate(req.params.id, updates, options);
+        if (!reclamation) return res.status(404).json({ error: 'Reclamation not found' });
+        res.status(200).json(reclamation);
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+    if (req.body.status) {
+        await sendWebhook({
+            event: 'reclamation_status_changed',
+            reclamation,
+        });
+    }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', (req, res) => {
     Reclamation.findByIdAndDelete(req.params.id)
         .then(reclamation => {
             if (!reclamation) return res.status(404).json({ error: 'Reclamation not found' });

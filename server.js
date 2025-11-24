@@ -6,7 +6,7 @@ const cors = require('cors');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
-// const reclamationRoutes = require('./routes/reclamationRoutes'); // note yet devoleped
+const reclamationRoutes = require('./routes/reclamationRoutes'); // note yet devoleped
 
 const app = express();
 
@@ -29,7 +29,7 @@ mongoose.connect(process.env.DATABASE_URL, {
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/deliveries', deliveryRoutes);
-// app.use('/api/reclamations', reclamationRoutes);
+app.use('/api/reclamations', reclamationRoutes);
 
 // Start server
 app.listen(process.env.PORT, () => {

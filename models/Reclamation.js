@@ -1,27 +1,33 @@
 const mongoose = require('mongoose');
 
 const reclamationSchema = new mongoose.Schema({
+    customer_name: {
+        type: String,
+        trim: true,
+        required: true,
+    },
     customer_fb_id: {
         type: String,
-        trim: true
-    },
-    order_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order',
-        required: true
+        trim: true,
+        required: true,
     },
     issue_description: {
         type: String,
-        trim: true
-    },
-    reclamation_date: {
-        type: Date,
-        default: Date.now
+        trim: true,
+        required: true,
     },
     status: {
         type: String,
         enum: ['Open', 'In Progress', 'Resolved', 'Closed'],
-        default: 'Open'
+        default: 'Open',
+    },
+    order: { // a reclamation does not have to be related to an order, so it's not required
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order',
+    },
+    reclamation_date: {
+        type: Date,
+        default: Date.now
     },
     createdAt: {
         type: Date,

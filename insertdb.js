@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const productsData = require('./data/Products.json');
 const ordersData = require('./data/Orders.json');
 const deliveriesData = require('./data/Deliveries.json');
+const reclamationsData = require('./data/Reclamations.json');
 
 const ReferenceGenerator = require('./models/ReferenceGenerator.js');
 
@@ -64,6 +65,7 @@ async function main() {
     await clearCollection('products');
     await clearCollection('orders');
     await clearCollection('deliveries');
+    await clearCollection('reclamations');
     console.log('existing data deleted successfully');
 
     console.log('inserting products data ...');
@@ -85,6 +87,18 @@ async function main() {
     console.log('inserting deliveries data ...');
     const deliveries = await insertIntoCollection('deliveries', deliveriesData);
     console.log('deliveries data inserted successfully');
+
+    reclamationsData.forEach(reclamation => {
+        // if the reclamation will be attached to an order or no
+        const percentage = getRandomInt(0, 99, true);
+        if (percentage < 50) {
+            const randomIndex = getRandomInt(0, orders.length, false);
+            reclamation.order = orders[randomIndex]._id;
+        }
+    })
+    console.log('inserting reclamations data ...');
+    const reclamations = await insertIntoCollection('reclamations', reclamationsData);
+    console.log('reclamations data inserted successfully');
 
     await mongoose.disconnect();
 }

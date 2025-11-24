@@ -15,10 +15,8 @@ const closeBtn = document.querySelector('.close');
 filterBtn.addEventListener('click', applyFilter);
 refreshBtn.addEventListener('click', loadOrders);
 closeBtn.addEventListener('click', closeModal);
-window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-        closeModal();
-    }
+window.addEventListener('click', (event) => {
+    if (event.target === modal) closeModal();
 });
 
 // Load orders on page load
@@ -29,9 +27,7 @@ async function loadOrders() {
     try {
         const response = await fetch(ORDERS_API);
         if (!response.ok) throw new Error('Failed to fetch orders');
-
         const orders = await response.json();
-        console.log('Fetched orders:', orders);
         displayOrders(orders);
     } catch (error) {
         console.error('Error loading orders:', error);
@@ -42,17 +38,11 @@ async function loadOrders() {
 }
 
 async function applyFilter() {
-    const status = statusFilter.value;
     showLoading(true);
     try {
-        let url = ORDERS_API;
-        if (status) {
-            url += `?status=${status}`;
-        }
-
+        const url = ORDERS_API + (statusFilter.value ? `?status=${statusFilter.value}` : '');
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch orders');
-
         const orders = await response.json();
         displayOrders(orders);
     } catch (error) {
@@ -65,14 +55,11 @@ async function applyFilter() {
 
 function displayOrders(orders) {
     ordersContainer.innerHTML = '';
-
     if (orders.length === 0) {
         emptyState.style.display = 'block';
         return;
     }
-
     emptyState.style.display = 'none';
-
     orders.forEach(order => {
         const orderCard = createOrderCard(order);
         ordersContainer.appendChild(orderCard);
@@ -96,11 +83,12 @@ function createOrderCard(order) {
     let totalAmount = 0;
     if (order.items && order.items.length > 0) {
         itemsHTML = order.items.map(item => {
-            const productName = item.ref || 'Unknown Product';
+            const productName = item.product_id.name || 'Unknown Product'; // TODO: item.product_id should be item.product, i made a wrong naming in the db schema
+            const productReference = item.product_id.reference || 'Unknown Product';
             const price = item.price ?? 0;
             totalAmount += price * item.quantity;
             return `<div class="item">
-                <strong>${productName}</strong> - Qty: ${item.quantity} × $${price.toFixed(2)}
+                <strong>${productName} (${productReference})</strong> - Qty: ${item.quantity} × $${price.toFixed(2)}
             </div>`;
         }).join('');
     }
@@ -208,11 +196,12 @@ async function showOrderDetails(orderId) {
         let totalAmount = 0;
         if (order.items && order.items.length > 0) {
             itemsHTML = order.items.map(item => {
-                const productName = item.ref || 'Unknown Product';
+                const productName = item.product_id.name || 'Unknown Product';
+                const productReference = item.product_id.reference || 'Unknown Product';
                 const price = item.price ?? 0;
                 totalAmount += item.quantity * price;
                 return `<tr>
-                    <td>${productName}</td>
+                    <td>${productName} (${productReference})</td>
                     <td>${item.quantity}</td>
                     <td>$${price.toFixed(2)}</td>
                     <td>$${(item.quantity * price).toFixed(2)}</td>

@@ -10,7 +10,6 @@ const reclamationSchema = new mongoose.Schema({
     customer_name: {
         type: String,
         trim: true,
-        required: true,
     },
     customer_fb_id: {
         type: String,
@@ -43,7 +42,6 @@ const reclamationSchema = new mongoose.Schema({
             message: 'At least one message is required.'
         }
     },
-        
     status: {
         type: String,
         enum: ['Open', 'In Progress', 'Closed'],

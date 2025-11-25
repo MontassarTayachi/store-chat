@@ -36,12 +36,12 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-    
+
     // Remove active class from all buttons
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Show selected tab
     if (tabName === 'orders') {
         document.getElementById('ordersTab').classList.add('active');
@@ -345,17 +345,17 @@ async function applyReclamationFilter() {
         if (reclamationStatusFilter.value) {
             url += `?status=${reclamationStatusFilter.value}`;
         }
-        
+
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch reclamations');
         let reclamations = await response.json();
-        
+
         // Client-side filtering for needs_answer (virtual property)
         if (reclamationNeedsAnswerFilter.value !== '') {
             const needsAnswer = reclamationNeedsAnswerFilter.value === 'true';
             reclamations = reclamations.filter(rec => rec.needs_answer === needsAnswer);
         }
-        
+
         displayReclamations(reclamations);
     } catch (error) {
         console.error('Error applying filter:', error);

@@ -81,4 +81,7 @@ reclamationSchema.virtual('needs_answer').get(function() {
     return lastMessage.sender === 'Client';
 });
 
+reclamationSchema.set('toJSON', { virtuals: true });
+reclamationSchema.set('toObject', { virtuals: true });
+
 module.exports = mongoose.model('Reclamation', reclamationSchema, 'reclamations');

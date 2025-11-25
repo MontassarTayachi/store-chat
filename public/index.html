@@ -9,45 +9,93 @@
 <body>
     <div class="container">
         <header>
-            <h1>📋 Order Management System</h1>
-            <p class="subtitle">Manage pending orders</p>
+            <h1>📋 Management System</h1>
+            <p class="subtitle">Manage orders and reclamations</p>
         </header>
 
-        <div class="filters">
-            <div class="filter-group">
-                <label for="statusFilter">Filter by Status:</label>
-                <select id="statusFilter">
-                    <option value="">All Orders</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
-                </select>
-                <button id="filterBtn" class="btn btn-primary">Apply Filter</button>
-                <button id="refreshBtn" class="btn btn-secondary">Refresh</button>
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('orders')">📦 Orders</button>
+            <button class="tab-btn" onclick="switchTab('reclamations')">⚠️ Reclamations</button>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="ordersTab" class="tab-content active">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="statusFilter">Filter by Status:</label>
+                    <select id="statusFilter">
+                        <option value="">All Orders</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <button id="filterBtn" class="btn btn-primary">Apply Filter</button>
+                    <button id="refreshBtn" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+
+            <div id="loadingSpinner" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading orders...</p>
+            </div>
+
+            <div id="ordersContainer" class="orders-container">
+                <!-- Orders will be rendered here -->
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <p>No orders found</p>
             </div>
         </div>
 
-        <div id="loadingSpinner" class="loading" style="display: none;">
-            <div class="spinner"></div>
-            <p>Loading orders...</p>
-        </div>
+        <!-- Reclamations Tab -->
+        <div id="reclamationsTab" class="tab-content">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="reclamationStatusFilter">Filter by Status:</label>
+                    <select id="reclamationStatusFilter">
+                        <option value="">All Reclamations</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <button id="reclamationFilterBtn" class="btn btn-primary">Apply Filter</button>
+                    <button id="reclamationRefreshBtn" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
 
-        <div id="ordersContainer" class="orders-container">
-            <!-- Orders will be rendered here -->
-        </div>
+            <div id="reclamationLoadingSpinner" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading reclamations...</p>
+            </div>
 
-        <div id="emptyState" class="empty-state" style="display: none;">
-            <p>No orders found</p>
+            <div id="reclamationsContainer" class="reclamations-container">
+                <!-- Reclamations will be rendered here -->
+            </div>
+
+            <div id="reclamationEmptyState" class="empty-state" style="display: none;">
+                <p>No reclamations found</p>
+            </div>
         </div>
     </div>
 
     <!-- Modal for order details -->
     <div id="orderModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" onclick="closeOrderModal()">&times;</span>
             <h2>Order Details</h2>
             <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Modal for reclamation details and response -->
+    <div id="reclamationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeReclamationModal()">&times;</span>
+            <h2>Reclamation Details</h2>
+            <div id="reclamationModalBody"></div>
         </div>
     </div>
 

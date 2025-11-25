@@ -76,7 +76,7 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Virtual field to calculate total_amount from items
-orderSchema.virtual('total_amount').get(() => {
+orderSchema.virtual('total_amount').get(function() {
     if (!this.items || this.items.length === 0) return 0;
     return this.items.reduce((sum, item) => {
         return sum + (item.price * item.quantity);

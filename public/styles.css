@@ -36,6 +36,51 @@ header h1 {
     font-size: 1.1em;
 }
 
+/* Tab Styles */
+.tabs {
+    display: flex;
+    gap: 10px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    border: none;
+    background: #f0f0f0;
+    color: #666;
+    font-weight: 600;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px 5px 0 0;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    background: #e0e0e0;
+}
+
+.tab-btn.active {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 -4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.tab-content {
+    display: none;
+    background: white;
+    border-radius: 0 10px 10px 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 .filters {
     background: white;
     padding: 20px;
@@ -157,6 +202,12 @@ header h1 {
     gap: 20px;
 }
 
+.reclamations-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: 20px;
+}
+
 .order-card {
     background: white;
     padding: 25px;
@@ -171,6 +222,20 @@ header h1 {
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
+.reclamation-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    border-left: 5px solid #f59e0b;
+}
+
+.reclamation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
 .order-header {
     display: flex;
     justify-content: space-between;
@@ -181,6 +246,23 @@ header h1 {
 }
 
 .order-id {
+    font-weight: 700;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.reclamation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+    flex-wrap: wrap;
+}
+
+.reclamation-id {
     font-weight: 700;
     color: #333;
     font-size: 1.1em;
@@ -207,6 +289,46 @@ header h1 {
 .status-cancelled {
     background: #fecaca;
     color: #7f1d1d;
+}
+
+.status-shipped {
+    background: #bfdbfe;
+    color: #1e40af;
+}
+
+.status-delivered {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-open {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-in-progress {
+    background: #bfdbfe;
+    color: #1e40af;
+}
+
+.status-closed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-alert {
+    background: #fee2e2;
+    color: #7f1d1d;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
 }
 
 .order-info {
@@ -261,6 +383,38 @@ header h1 {
 
 .order-actions .btn {
     flex: 1;
+}
+
+.reclamation-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.reclamation-actions .btn {
+    flex: 1;
+}
+
+.reclamation-info {
+    margin-bottom: 15px;
+}
+
+.reclamation-info .info-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.reclamation-info .info-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.reclamation-info .info-value {
+    color: #666;
+    line-height: 1.5;
 }
 
 .empty-state {
@@ -348,8 +502,71 @@ header h1 {
     display: none;
 }
 
+/* Discussion Thread Styles */
+.discussion-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.discussion-message {
+    padding: 12px 15px;
+    border-radius: 6px;
+    border-left: 4px solid #e0e0e0;
+}
+
+.client-message {
+    background-color: #f0f7ff;
+    border-left-color: #667eea;
+    margin-right: 20px;
+}
+
+.admin-message {
+    background-color: #f0fdf4;
+    border-left-color: #10b981;
+    margin-left: 20px;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.85em;
+    color: #666;
+}
+
+.message-header strong {
+    color: #333;
+}
+
+.message-time {
+    font-size: 0.75em;
+    color: #999;
+}
+
+.message-body {
+    color: #333;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+@media (max-width: 768px) {
+    .client-message {
+        margin-right: 0;
+    }
+
+    .admin-message {
+        margin-left: 0;
+    }
+}
+
 @media (max-width: 768px) {
     .orders-container {
+        grid-template-columns: 1fr;
+    }
+
+    .reclamations-container {
         grid-template-columns: 1fr;
     }
 
@@ -369,5 +586,21 @@ header h1 {
 
     .order-actions {
         flex-direction: column;
+    }
+
+    .reclamation-actions {
+        flex-direction: column;
+    }
+
+    .tabs {
+        flex-direction: column;
+    }
+
+    .tab-btn {
+        border-radius: 5px;
+    }
+
+    .tab-content {
+        border-radius: 10px;
     }
 }

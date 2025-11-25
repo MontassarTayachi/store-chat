@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
+    reference: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
     customer_name: {
         type: String,
         trim: true,
@@ -32,24 +38,33 @@ const orderSchema = new mongoose.Schema({
         default: Date.now
     },
     // multiple products
-    items: [
-        {
-            product_id: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product',
-                required: true,
-            },
-            quantity: {
-                type: Number,
-                required: true,
-                min: 1,
-            },
-            price: {
-                type: Number,
-                required: true,
+    items: {
+        type: [
+            {
+                product_id: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Product',
+                    required: true,
+                },
+                quantity: {
+                    type: Number,
+                    required: true,
+                    min: 1,
+                },
+                price: {
+                    type: Number,
+                    required: true,
+                }
             }
+        ],
+        validate: {
+            validator: function (arr) {
+                return arr.length >= 1;
+            },
+            message: 'At least one item is required.'
         }
-    ],
+    }
+,
     createdAt: {
         type: Date,
         default: Date.now,

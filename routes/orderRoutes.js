@@ -1,7 +1,8 @@
 const express = require('express');
 
-const Order = require('../models/Order');
-const Product = require('../models/Product');
+const Order = require('../models/Order.js');
+const Product = require('../models/Product.js');
+const ReferenceGenerator = require('../models/ReferenceGenerator.js');
 const { getFilter, sendWebhook } = require('../utils/utils.js');
 
 const router = express.Router();
@@ -38,11 +39,16 @@ async function validateProductsExistance(req, res, next) {
     }
 }
 
-router.post('/', validateProductsExistance, (req, res) => {
-    const newOrder = new Order(req.body);
-    newOrder.save()
-        .then(savedOrder => res.status(201).json(savedOrder))
-        .catch(err => res.status(500).json({ error: err.message }));
+router.post('/', validateProductsExistance, async (req, res) => {
+    try {
+        const referenceValue = await ReferenceGenerator.getNextReference('Order');
+        const reference = `ORD-${referenceValue}`;
+        const newOrder = new Order({ ...req.body, reference });
+        const savedOrder = await newOrder.save();
+        res.status(201).json(savedOrder);
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
 });
 
 router.put('/:id', validateProductsExistance, async (req, res) => {

@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const reclamationSchema = new mongoose.Schema({
+    reference: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
     customer_name: {
         type: String,
         trim: true,
@@ -11,15 +17,24 @@ const reclamationSchema = new mongoose.Schema({
         trim: true,
         required: true,
     },
-    issue_description: { // the client issue reclamed
-        type: String,
-        trim: true,
-        required: true,
-    },
-    response: { // the website admin response
-        type: String,
-        trim: true,
-    },
+    discussion: [
+        {
+            message: {
+                type: String,
+                trim: true,
+                required: true,
+            },
+            sender: {
+                type: String,
+                enum: ['Client', 'Admin'],
+                required: true,
+            },
+            timestamp: {
+                type: Date,
+                default: Date.now,
+            },
+        }
+    ],
     status: {
         type: String,
         enum: ['Open', 'In Progress', 'Closed'],
@@ -41,6 +56,20 @@ const reclamationSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
+});
+
+reclamationSchema.methods.addMessage = function(messageText, sender) {
+    this.discussion.push({
+        message: messageText,
+        sender: sender,
+        timestamp: Date.now(),
+    });
+}
+
+reclamationSchema.virtual('needs_answer').get(function() {
+    if (this.discussion.length === 0) return true;
+    const lastMessage = this.discussion[this.discussion.length - 1];
+    return lastMessage.sender === 'Client';
 });
 
 module.exports = mongoose.model('Reclamation', reclamationSchema, 'reclamations');

@@ -2,6 +2,7 @@ const express = require('express');
 
 const Order = require('../models/Order.js');
 const Reclamation = require('../models/Reclamation.js');
+const ReferenceGenerator = require('../models/ReferenceGenerator.js');
 const { getFilter, sendWebhook } = require('../utils/utils.js');
 
 const router = express.Router();
@@ -33,26 +34,53 @@ async function validateOrderExistance(req, res, next) {
     }
 }
 
-router.post('/', validateOrderExistance, (req, res) => {
-    const newReclamation = new Reclamation({ ...req.body });
-    newReclamation.save()
-        .then(savedReclamation => savedReclamation.populate('order'))
-        .then(populatedReclamation => res.status(201).json(populatedReclamation))
-        .catch(err => res.status(500).json({ error: err.message }));
+router.post('/', validateOrderExistance, async (req, res) => {
+    try {
+        const referenceValue = await ReferenceGenerator.getNextReference('Reclamation');
+        const reference = `RECL-${referenceValue}`;
+        const newReclamation = new Reclamation({ ...req.body, reference });
+        newReclamation.addMessage(req.body.message, req.body.sender);
+        const savedReclamation = await newReclamation.save();
+        if (savedReclamation.order) await savedReclamation.populate('order');
+        res.status(201).json(savedReclamation);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-router.put('/:id', async (req, res) => {
+router.post('/:id/discussion', async (req, res) => {
+    let reclamation = null;
+    try {
+        reclamation = await Reclamation.findById(req.params.id);
+        if (!reclamation) return res.status(404).json({ error: 'Reclamation not found' });
+        reclamation.addMessage(req.body.message, req.body.sender)
+        reclamation = await reclamation.save();
+        if (reclamation.order) await reclamation.populate('order');
+        res.status(200).json(reclamation);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+
+    if (req.body.sender === 'Admin') {
+        await sendWebhook({
+            event: 'reclamation_message_responded',
+            reclamation,
+        });
+    }
+})
+
+router.put('/:id', validateOrderExistance, async (req, res) => {
     let reclamation = null;
     try {
         const updates = { ...req.body, updatedAt: Date.now() };
         const options = { new: true, runValidators: true };
-        reclamation = Reclamation.findByIdAndUpdate(req.params.id, updates, options);
+        reclamation = await Reclamation.findByIdAndUpdate(req.params.id, updates, options);
         if (!reclamation) return res.status(404).json({ error: 'Reclamation not found' });
         res.status(200).json(reclamation);
     } catch (err) {
         res.status(500).json({ error: err.message })
     }
-    if (req.body.status) {
+    if (req.body.status === 'In Progress') {
         await sendWebhook({
             event: 'reclamation_status_changed',
             reclamation,

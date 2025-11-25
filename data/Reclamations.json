@@ -2,21 +2,24 @@
     {
         "customer_name": "Alice Johnson",
         "customer_fb_id": "alice_johnson_fb",
-        "issue_description": "Wireless mouse stopped working after 2 weeks. Not responding to clicks.",
+        "message": "Wireless mouse stopped working after 2 weeks. Not responding to clicks.",
+        "sender": "Client",
         "status": "Open",
         "reclamation_date": "2025-11-15"
     },
     {
         "customer_name": "Mark Thompson",
         "customer_fb_id": "mark_thompson_fb",
-        "issue_description": "Mechanical keyboard has a stuck key. The 'A' key is not registering properly.",
+        "message": "Mechanical keyboard has a stuck key. The 'A' key is not registering properly.",
+        "sender": "Client",
         "status": "In Progress",
         "reclamation_date": "2025-11-16"
     },
     {
         "customer_name": "John Doe",
         "customer_fb_id": "john_doe_fb",
-        "issue_description": "General inquiry about warranty coverage and replacement procedures.",
+        "message": "General inquiry about warranty coverage and replacement procedures.",
+        "sender": "Client",
         "status": "Open",
         "reclamation_date": "2025-11-17"
     }

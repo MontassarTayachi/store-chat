@@ -65,6 +65,7 @@ router.post('/:id/discussion', async (req, res) => {
         await sendWebhook({
             event: 'reclamation_message_responded',
             reclamation,
+            message: req.body.message,
         });
     }
 })

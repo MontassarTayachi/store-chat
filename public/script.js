@@ -18,6 +18,7 @@ const reclamationEmptyState = document.getElementById('reclamationEmptyState');
 const reclamationFilterBtn = document.getElementById('reclamationFilterBtn');
 const reclamationRefreshBtn = document.getElementById('reclamationRefreshBtn');
 const reclamationStatusFilter = document.getElementById('reclamationStatusFilter');
+const reclamationNeedsAnswerFilter = document.getElementById('reclamationNeedsAnswerFilter');
 const reclamationModal = document.getElementById('reclamationModal');
 
 // Event Listeners - Orders
@@ -339,10 +340,22 @@ async function loadReclamations() {
 async function applyReclamationFilter() {
     showReclamationLoading(true);
     try {
-        const url = RECLAMATIONS_API + (reclamationStatusFilter.value ? `?status=${reclamationStatusFilter.value}` : '');
+        // Build URL with status filter only (backend query)
+        let url = RECLAMATIONS_API;
+        if (reclamationStatusFilter.value) {
+            url += `?status=${reclamationStatusFilter.value}`;
+        }
+        
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch reclamations');
-        const reclamations = await response.json();
+        let reclamations = await response.json();
+        
+        // Client-side filtering for needs_answer (virtual property)
+        if (reclamationNeedsAnswerFilter.value !== '') {
+            const needsAnswer = reclamationNeedsAnswerFilter.value === 'true';
+            reclamations = reclamations.filter(rec => rec.needs_answer === needsAnswer);
+        }
+        
         displayReclamations(reclamations);
     } catch (error) {
         console.error('Error applying filter:', error);

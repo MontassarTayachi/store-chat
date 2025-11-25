@@ -78,7 +78,7 @@ reclamationSchema.methods.addMessage = function(messageText, sender) {
 reclamationSchema.virtual('needs_answer').get(function() {
     if (this.discussion.length === 0) return true;
     const lastMessage = this.discussion[this.discussion.length - 1];
-    return lastMessage.sender === 'Client';
+    return lastMessage.sender === 'Client' && this.status !== 'Closed';
 });
 
 reclamationSchema.set('toJSON', { virtuals: true });

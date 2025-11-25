@@ -17,24 +17,33 @@ const reclamationSchema = new mongoose.Schema({
         trim: true,
         required: true,
     },
-    discussion: [
-        {
-            message: {
-                type: String,
-                trim: true,
-                required: true,
+    discussion: {
+        type: [
+            {
+                message: {
+                    type: String,
+                    trim: true,
+                    required: true,
+                },
+                sender: {
+                    type: String,
+                    enum: ['Client', 'Admin'],
+                    required: true,
+                },
+                timestamp: {
+                    type: Date,
+                    default: Date.now,
+                },
+            }
+        ],
+        validate: {
+            validator: function (arr) {
+                return arr.length >= 1;
             },
-            sender: {
-                type: String,
-                enum: ['Client', 'Admin'],
-                required: true,
-            },
-            timestamp: {
-                type: Date,
-                default: Date.now,
-            },
+            message: 'At least one message is required.'
         }
-    ],
+    },
+        
     status: {
         type: String,
         enum: ['Open', 'In Progress', 'Closed'],
